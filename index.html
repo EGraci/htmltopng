@@ -1,109 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
-
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gistech</title>
-
-    <style>
-        .downloadtable {
-            margin-top: 40px;
-            padding: 20px;
-        }
-    </style>
+    <title>Hidden Message</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="steganography.min.js"></script>
 </head>
-
 <body>
-
-    <h2>HTML Table</h2>
-
-    <div id="tablecontainer">
-        <table class="table table-striped table-dark">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Last</th>
-                    <th scope="col">Handle</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>Larry</td>
-                    <td>the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-            </tbody>
-        </table>
+    <h1>Encode Pesan</h1>
+    <input type="file" name="gambar" id="file" onchange="previewImage();" />
+    <div class="lihat-gambar" id="lihat-gambar">
+        <img src="" alt="Hasil Gambar" id="gambar" class="hasil-gambar">
+        <span id="view">Lihat Gambar</span>
     </div>
+    <br>
+    <h3>Pesan Rahasia</h3>
+    <input type="text" id="text" placeholder="Minimal inputan text 13 digit" required> 
+    <button onclick="encode()">Encode Pesan</button>
+    <br>
+    <div id="hasil">
+        <img src="" id="pesan">
+    </div>
+    <br>
+    <h1>Decode Pesan</h1>
+    <input type="file" name="gambar" id="Dfile" onchange="decode();" />
+    <div class="lihat-gambar" id="lihat-gambar">
+        <img src="" alt="Hasil Gambar" id="Dgambar" class="hasil-gambar">
+        <span id="Dview">Lihat Gambar</span>
+    </div>
+    <br>
+    <input type="hidden" id="terima" readonly />
 
+    <script>
+        var Dimage;
+        function previewImage() {
+            document.getElementById("gambar").style.display = "block";
+            document.getElementById("view").style.display = "none";
+            var oFReader = new FileReader();
+            oFReader.readAsDataURL(document.getElementById("file").files[0]);
+        
+            oFReader.onload = function(oFREvent) {
+            document.getElementById("gambar").src = oFREvent.target.result;
+            Dimage = oFREvent.target.result;
+            };
+        }
+        // fungsi utama private message
+        function encode(){
+            if(document.getElementById("text").value.length > 13){
+                //document.getElementById("hasil").style.display = "flex"; tampilan
+                document.getElementById("pesan").src = steg.encode(document.getElementById("text").value, Dimage);
+                // download
+                var data = steg.encode(document.getElementById("text").value, Dimage);
+                download(data,"Encode.png");
+            }else{
+                alert("Pesan minimal 13 digit !!!");
+            }
 
+        }
+        function decode(){
+            document.getElementById("terima").value = "";
+            document.getElementById("Dgambar").style.display = "block";
+            document.getElementById("Dview").style.display = "none";
+            var Reader = new FileReader();
+            Reader.readAsDataURL(document.getElementById("Dfile").files[0]);
+            Reader.onload = function(oFREvent) {
+            document.getElementById("Dgambar").src = oFREvent.target.result;
+            document.getElementById("terima").value = steg.decode(oFREvent.target.result);
+            document.getElementById("terima").type = "text";
+            };
+        }
 
+        function download(uri, name) {
+            var link = document.createElement("a");
+            link.download = name;
+            link.href = uri;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            delete link;
+        }
 
-    <button id="demo" class="downloadtable" onclick="downloadtable()"> Download Table</button>
-
-
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
+        
+    </script>
 </body>
-
-<script>
-
-    function downloadtable() {
-
-        var node = document.getElementById('tablecontainer');
-
-        domtoimage.toPng(node)
-            .then(function (dataUrl) {
-                var img = new Image();
-                img.src = dataUrl;
-                downloadURI(dataUrl, "records.png")
-            })
-            .catch(function (error) {
-                console.error('oops, something went wrong!', error);
-            });
-
-    }
-
-
-
-    function downloadURI(uri, name) {
-        var link = document.createElement("a");
-        link.download = name;
-        link.href = uri;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        delete link;
-    }
-
-
-
-</script>
-
 </html>
